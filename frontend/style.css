@@ -748,7 +748,24 @@ body::before {
 }
 
 /* ── HISTORY TABLE ── */
-.history-table { width: 100%; border-collapse: collapse; }
+.table-container {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  backdrop-filter: blur(10px);
+  width: 100%;
+}
+
+.history-table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+}
+
 .history-table th {
   text-align: left;
   padding: 12px 16px;
@@ -758,21 +775,26 @@ body::before {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   border-bottom: 1px solid var(--glass-border);
+  white-space: nowrap;
 }
+
 .history-table td {
   padding: 14px 16px;
   font-size: 13px;
   border-bottom: 1px solid rgba(255,255,255,0.03);
   vertical-align: middle;
+  white-space: nowrap;
 }
+
 .history-table tr:hover td { background: var(--bg-card-hover); }
 
-.table-container {
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  backdrop-filter: blur(10px);
+.mobile-scroll-hint {
+  display: none;
+  font-size: 11px;
+  color: var(--accent-gold);
+  margin-bottom: 10px;
+  text-align: right;
+  letter-spacing: 0.3px;
 }
 
 /* ── MODAL ── */
@@ -976,6 +998,29 @@ body::before {
     width: 100%;
   }
   .form-input { font-size: 16px !important; } /* Prevents iOS Safari auto-zoom */
+
+  .mobile-scroll-hint { display: block; }
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+    border-radius: var(--radius);
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-gold) rgba(255, 255, 255, 0.05);
+  }
+  .table-container::-webkit-scrollbar {
+    height: 5px;
+  }
+  .table-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .table-container::-webkit-scrollbar-thumb {
+    background: var(--accent-gold);
+    border-radius: 4px;
+  }
+  .history-table {
+    min-width: 620px;
+  }
 }
 
 @media (max-width: 480px) {
