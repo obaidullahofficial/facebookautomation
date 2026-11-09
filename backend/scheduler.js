@@ -4,22 +4,21 @@ const { createComposedImage } = require("./imageComposer");
 const { publishToFacebook } = require("./facebookApi");
 const { queries, getSetting } = require("./database");
 
-let generationTask = null;
 let publishingTask = null;
 
 function buildCronExpression(timeStr) {
   // timeStr format: "HH:MM"
-  const [hour, minute] = timeStr.split(":").map(Number);
+  const [hour, minute] = (timeStr || "09:00").split(":").map(Number);
   return `${minute} ${hour} * * *`;
 }
 
 /**
- * 1. Post Generation Process
- * Automatically generates a new Islamic post based on scheduled interval and saves as PENDING.
- * This process is completely separate from publishing.
+ * 1. Manual Post Generation Process
+ * Called on demand when user clicks "✨ Generate Now" button in the portal.
+ * Generates a new Islamic post and saves as PENDING in Approval Queue.
  */
 async function runDailyGeneration() {
-  console.log(`\n[Scheduler] Starting daily Islamic post generation at ${new Date().toISOString()}`);
+  console.log(`\n[Scheduler] Starting manual Islamic post generation at ${new Date().toISOString()}`);
 
   try {
     const geminiApiKey = getSetting("gemini_api_key") || "";
@@ -64,11 +63,12 @@ async function runDailyGeneration() {
 }
 
 /**
- * 2. FIFO Publishing Process
- * Checks the publishing queue (approved posts in History).
- * Publishes the oldest approved post (First-In, First-Out).
- * Only one post is published per interval.
- * Once published, sets status to PUBLISHED and saves fb_post_id to prevent duplicates.
+ * 2. FIFO Publishing Process (Controlled by Settings Time)
+ * Runs automatically at the configured daily publishing time.
+ * - Follows First-In, First-Out (FIFO): oldest approved post is published first.
+ * - Publishes exactly one approved post per scheduled interval.
+ * - If no approved posts are available in queue, silently skips that publishing time.
+ * - On success, sets status to PUBLISHED and stores fb_post_id.
  */
 async function runScheduledPublishing() {
   console.log(`\n[Scheduler] Running scheduled FIFO publishing check at ${new Date().toISOString()}...`);
@@ -76,14 +76,14 @@ async function runScheduledPublishing() {
     const approvedPosts = queries.getApprovedPosts.all();
 
     if (approvedPosts.length === 0) {
-      console.log(`[Scheduler] Publishing queue is empty (no approved posts awaiting publishing).`);
-      return { success: true, published: false, message: "No approved posts in queue" };
+      console.log(`[Scheduler] ℹ️ Publishing queue is empty (no approved posts awaiting publishing). Skipping this publishing interval.`);
+      return { success: true, published: false, skipped: true, message: "No approved posts in queue. Skipped interval." };
     }
 
     // FIFO: Pick the oldest approved post
     const postToPublish = approvedPosts[0];
     console.log(
-      `[Scheduler] Found ${approvedPosts.length} post(s) in queue. Publishing oldest approved post ID #${postToPublish.id} (${postToPublish.surah} • Ayat ${postToPublish.ayat_number})...`
+      `[Scheduler] 🚀 Found ${approvedPosts.length} approved post(s) in queue. Publishing oldest approved post ID #${postToPublish.id} (${postToPublish.surah} • Ayat ${postToPublish.ayat_number}) in FIFO order...`
     );
 
     const result = await publishToFacebook(postToPublish);
@@ -112,59 +112,37 @@ async function runScheduledPublishing() {
 }
 
 function stopScheduler() {
-  if (generationTask) {
-    if (typeof generationTask.stop === "function") generationTask.stop();
-    else if (typeof generationTask.destroy === "function") generationTask.destroy();
-    generationTask = null;
-  }
   if (publishingTask) {
     if (typeof publishingTask.stop === "function") publishingTask.stop();
     else if (typeof publishingTask.destroy === "function") publishingTask.destroy();
     publishingTask = null;
   }
-  console.log("[Scheduler] Schedulers stopped.");
+  console.log("[Scheduler] Publishing scheduler stopped.");
 }
 
 function startScheduler() {
-  const scheduleEnabled = getSetting("schedule_enabled") !== "false";
-  const scheduleTime = getSetting("schedule_time") || "09:00";
-
-  const publishEnabled = getSetting("publish_enabled") !== "false";
-  const publishTime = getSetting("publish_schedule_time") || "10:00";
+  const publishEnabled = getSetting("schedule_enabled") !== "false";
+  const publishTime = getSetting("schedule_time") || "09:00";
 
   stopScheduler();
 
-  // 1. Post Generation Scheduler
-  if (scheduleEnabled) {
-    const genCron = buildCronExpression(scheduleTime);
-    console.log(`[Scheduler] ⏰ Auto-generation scheduled daily at ${scheduleTime} PKT (cron: ${genCron})`);
-    generationTask = cron.schedule(
-      genCron,
-      async () => {
-        await runDailyGeneration();
-      },
-      { timezone: "Asia/Karachi" }
-    );
-  } else {
-    console.log("[Scheduler] Auto-generation is disabled.");
+  if (!publishEnabled) {
+    console.log("[Scheduler] Auto-publishing is disabled in Settings.");
+    return;
   }
 
-  // 2. FIFO Post Publishing Scheduler
-  if (publishEnabled) {
-    const pubCron = buildCronExpression(publishTime);
-    console.log(`[Scheduler] 🚀 Auto-publishing (FIFO) scheduled daily at ${publishTime} PKT (cron: ${pubCron})`);
-    publishingTask = cron.schedule(
-      pubCron,
-      async () => {
-        await runScheduledPublishing();
-      },
-      { timezone: "Asia/Karachi" }
-    );
-  } else {
-    console.log("[Scheduler] Auto-publishing is disabled.");
-  }
+  const pubCron = buildCronExpression(publishTime);
+  console.log(`[Scheduler] 🚀 Daily Facebook Auto-Publishing (FIFO) scheduled at ${publishTime} PKT (cron: ${pubCron})`);
 
-  console.log(`[Scheduler] ✅ Schedulers active and running.`);
+  publishingTask = cron.schedule(
+    pubCron,
+    async () => {
+      await runScheduledPublishing();
+    },
+    { timezone: "Asia/Karachi" }
+  );
+
+  console.log(`[Scheduler] ✅ Auto-publishing scheduler active.`);
 }
 
 function restartScheduler() {
