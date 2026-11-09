@@ -1,0 +1,9 @@
+{
+  "name": "islamic-fb-frontend",
+  "version": "1.0.0",
+  "description": "Frontend dashboard for Islamic Facebook Automation",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Static frontend build complete'"
+  }
+}
