@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 const axios = require("axios");
 const FormData = require("form-data");
 const { getSetting } = require("./database");
@@ -52,11 +53,19 @@ async function publishToFacebook(post) {
     form.append("caption", fullCaption);
     form.append("access_token", accessToken);
 
-    if (post.image_local_path && fs.existsSync(post.image_local_path)) {
-      form.append("source", fs.createReadStream(post.image_local_path));
+    let imagePath = post.image_local_path;
+    if (!imagePath || !fs.existsSync(imagePath)) {
+      const fileName = path.basename(post.image_url || `post_${post.id}.png`);
+      const candidatePath = path.join(__dirname, "..", "frontend", "generated", fileName);
+      if (fs.existsSync(candidatePath)) {
+        imagePath = candidatePath;
+      }
+    }
+
+    if (imagePath && fs.existsSync(imagePath)) {
+      form.append("source", fs.createReadStream(imagePath));
     } else {
-      // Fallback to URL if local path missing
-      form.append("url", post.image_url.startsWith("http") ? post.image_url : `https://raw.githubusercontent.com/`);
+      throw new Error(`Image file not found on server for post #${post.id}`);
     }
 
     const response = await axios.post(photoUrl, form, {
