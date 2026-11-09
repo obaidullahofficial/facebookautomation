@@ -2,8 +2,11 @@
   "name": "islamic-fb-frontend",
   "version": "1.0.0",
   "description": "Frontend dashboard for Islamic Facebook Automation",
-  "private": true,
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.21.1"
+  },
   "scripts": {
-    "build": "echo 'Static frontend build complete'"
+    "start": "node server.js"
   }
 }
