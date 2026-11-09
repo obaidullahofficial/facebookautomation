@@ -1,6 +1,4 @@
-const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-  ? ""
-  : "http://129.225.93.30:8080";
+const API = "";
 
 function getImageUrl(url) {
   if (!url) return "";

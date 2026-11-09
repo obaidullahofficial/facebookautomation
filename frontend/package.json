@@ -4,7 +4,8 @@
   "description": "Frontend dashboard for Islamic Facebook Automation",
   "main": "server.js",
   "dependencies": {
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "http-proxy-middleware": "^3.0.10"
   },
   "scripts": {
     "start": "node server.js"
