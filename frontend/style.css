@@ -25,23 +25,22 @@
 }
 
 :root {
-  --bg-primary: #0a0d1a;
-  --bg-secondary: #0f1428;
-  --bg-card: rgba(255, 255, 255, 0.04);
-  --bg-card-hover: rgba(255, 255, 255, 0.07);
-  --glass: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --bg-primary: #07110c;
+  --bg-secondary: #0d1e15;
+  --bg-card: rgba(255, 255, 255, 0.035);
+  --bg-card-hover: rgba(255, 255, 255, 0.065);
+  --glass: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(212, 175, 55, 0.15);
   --accent-gold: #d4af37;
-  --accent-gold-light: #f0d060;
-  --accent-teal: #00b4d8;
-  --accent-purple: #7c3aed;
-  --accent-green: #10b981;
-  --accent-red: #ef4444;
-  --text-primary: #f0f4ff;
-  --text-secondary: #8b92b3;
-  --text-muted: #4a5080;
-  --shadow-gold: 0 0 30px rgba(212, 175, 55, 0.15);
-  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --accent-gold-light: #f3e08b;
+  --accent-teal: #14b8a6;
+  --accent-green: #059669;
+  --accent-red: #dc2626;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --shadow-gold: 0 0 35px rgba(212, 175, 55, 0.12);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.45);
   --radius: 16px;
   --radius-sm: 10px;
   --radius-lg: 24px;
@@ -66,9 +65,9 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(0, 180, 216, 0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 30% at 50% 50%, rgba(124, 58, 237, 0.04) 0%, transparent 70%);
+    radial-gradient(ellipse 80% 50% at 15% -10%, rgba(212, 175, 55, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 105%, rgba(5, 150, 105, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 50% 50%, rgba(20, 184, 166, 0.03) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
