@@ -475,6 +475,7 @@ async function savePostEdit(event) {
       showToast("✨ Post updated successfully!", "success");
       closeEditModal();
       await Promise.all([loadStats(), loadPosts()]);
+      renderApprovalQueue();
       renderHistoryTable();
     } else {
       showToast(`❌ Error: ${data.error || "Failed to update"}`, "error");
