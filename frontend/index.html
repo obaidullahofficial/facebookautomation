@@ -142,14 +142,24 @@
     </div>
   </aside>
 
+  <!-- SIDEBAR MOBILE BACKDROP -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
   <!-- MAIN -->
   <main class="main-content">
 
     <!-- TOPBAR -->
     <header class="topbar">
-      <div>
-        <div class="topbar-title" id="topbarTitle">🕌 Approval Queue</div>
-        <div class="topbar-subtitle" id="topbarSubtitle">Review AI-generated Islamic posts before publishing</div>
+      <div class="topbar-left">
+        <button class="mobile-toggle-btn" id="mobileMenuBtn" onclick="toggleMobileSidebar()" aria-label="Toggle Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div>
+          <div class="topbar-title" id="topbarTitle">🕌 Approval Queue</div>
+          <div class="topbar-subtitle" id="topbarSubtitle">Review AI-generated Islamic posts before publishing</div>
+        </div>
       </div>
       <div class="topbar-actions">
         <div id="fbStatusIndicator"></div>
@@ -421,6 +431,28 @@
     </section>
 
   </main>
+
+  <!-- MOBILE BOTTOM NAVIGATION -->
+  <nav class="mobile-bottom-nav">
+    <div class="bottom-nav-item active" id="bnav-approval" onclick="showSection('approval')">
+      <span class="bnav-icon">✅</span>
+      <span class="bnav-label">Queue</span>
+      <span class="bnav-badge" id="bnavPendingBadge">0</span>
+    </div>
+    <div class="bottom-nav-item" id="bnav-history" onclick="showSection('history')">
+      <span class="bnav-icon">📅</span>
+      <span class="bnav-label">History</span>
+    </div>
+    <div class="bottom-nav-item" id="bnav-settings" onclick="showSection('settings')">
+      <span class="bnav-icon">⚙️</span>
+      <span class="bnav-label">Settings</span>
+    </div>
+    <div class="bottom-nav-item" id="bnav-setup" onclick="showSection('setup')">
+      <span class="bnav-icon">🚀</span>
+      <span class="bnav-label">Setup</span>
+    </div>
+  </nav>
+
 </div>
 
 <script src="app.js"></script>

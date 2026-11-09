@@ -19,9 +19,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 function showSection(name) {
   document.querySelectorAll(".page-section").forEach((s) => s.classList.remove("active"));
   document.querySelectorAll(".nav-item").forEach((n) => n.classList.remove("active"));
+  document.querySelectorAll(".bottom-nav-item").forEach((n) => n.classList.remove("active"));
 
-  document.getElementById(`section-${name}`).classList.add("active");
+  document.getElementById(`section-${name}`)?.classList.add("active");
   document.getElementById(`nav-${name}`)?.classList.add("active");
+  document.getElementById(`bnav-${name}`)?.classList.add("active");
 
   const titles = {
     approval: ["🕌 Approval Queue", "Review AI-generated Islamic posts before publishing"],
@@ -29,10 +31,27 @@ function showSection(name) {
     settings: ["⚙️ Settings", "Configure your Facebook and AI settings"],
     setup:    ["🚀 Setup Guide", "Connect your Facebook page and AI engine"],
   };
-  document.getElementById("topbarTitle").textContent = titles[name][0];
-  document.getElementById("topbarSubtitle").textContent = titles[name][1];
+  if (titles[name]) {
+    document.getElementById("topbarTitle").textContent = titles[name][0];
+    document.getElementById("topbarSubtitle").textContent = titles[name][1];
+  }
 
   if (name === "history") renderHistoryTable();
+  closeMobileSidebar();
+}
+
+function toggleMobileSidebar() {
+  const sidebar = document.querySelector(".sidebar");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  if (sidebar) sidebar.classList.toggle("mobile-open");
+  if (backdrop) backdrop.classList.toggle("show");
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.querySelector(".sidebar");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  if (sidebar) sidebar.classList.remove("mobile-open");
+  if (backdrop) backdrop.classList.remove("show");
 }
 
 // ── DATA LOADING ──────────────────────────────────────────────────────────────
@@ -49,6 +68,8 @@ async function loadStats() {
 
       const pending = s.pending || 0;
       document.getElementById("pendingBadge").textContent = pending;
+      const bnavBadge = document.getElementById("bnavPendingBadge");
+      if (bnavBadge) bnavBadge.textContent = pending;
       document.getElementById("pendingCount").textContent = `${pending} post${pending !== 1 ? "s" : ""} awaiting review`;
     }
   } catch (e) {
