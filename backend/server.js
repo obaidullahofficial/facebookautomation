@@ -27,6 +27,16 @@ app.get("/api/posts", (req, res) => {
   }
 });
 
+// DELETE clear all posts history
+app.delete("/api/posts", (req, res) => {
+  try {
+    queries.clearAllPosts.run();
+    res.json({ success: true, message: "All posts history cleared successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // GET pending posts only
 app.get("/api/posts/pending", (req, res) => {
   try {

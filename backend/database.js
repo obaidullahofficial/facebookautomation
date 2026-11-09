@@ -162,6 +162,14 @@ function getStats() {
   };
 }
 
+function clearAllPosts() {
+  const db = readDB();
+  db.posts = [];
+  db._nextId = 1;
+  writeDB(db);
+  return { success: true };
+}
+
 // Keep the same `queries` interface server.js expects
 const queries = {
   getAllPosts:         { all: getAllPosts },
@@ -172,6 +180,7 @@ const queries = {
   updatePostPublished:{ run: updatePostPublished },
   updatePostImage:    { run: updatePostImage },
   updatePost:         { run: updatePost },
+  clearAllPosts:      { run: clearAllPosts },
   getStats:           { get: getStats },
 };
 

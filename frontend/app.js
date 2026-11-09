@@ -316,6 +316,28 @@ async function approveAll() {
   await Promise.all([loadStats(), loadPosts()]);
 }
 
+async function clearAllHistory() {
+  if (!confirm("Are you sure you want to clear all posts history? This cannot be undone.")) return;
+  showLoader("🗑️ Clearing all posts history...");
+  try {
+    const res = await fetch(`${API}/api/posts`, { method: "DELETE" });
+    const data = await res.json();
+    hideLoader();
+
+    if (data.success) {
+      showToast("🗑️ All posts history cleared!", "success");
+      allPosts = [];
+      await Promise.all([loadStats(), loadPosts()]);
+      renderHistoryTable();
+    } else {
+      showToast(`❌ Error: ${data.error || "Failed to clear"}`, "error");
+    }
+  } catch (e) {
+    hideLoader();
+    showToast("❌ Could not connect to server", "error");
+  }
+}
+
 async function regenerateImage(id) {
   showLoader("🖼️ Generating new composed image...");
   try {
