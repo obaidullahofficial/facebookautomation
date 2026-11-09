@@ -6,21 +6,29 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const BACKEND_URL = process.env.BACKEND_URL || "http://129.225.93.30:8080";
 
-// Proxy API requests to Oracle backend
+// Proxy API requests to Oracle backend with error handling
 app.use(
   "/api",
   createProxyMiddleware({
     target: BACKEND_URL,
     changeOrigin: true,
+    onError: (err, req, res) => {
+      console.error("Proxy API Error:", err.message);
+      res.status(502).json({ success: false, error: "Backend proxy connection error: " + err.message });
+    },
   })
 );
 
-// Proxy generated images to Oracle backend
+// Proxy generated images to Oracle backend with error handling
 app.use(
   "/generated",
   createProxyMiddleware({
     target: BACKEND_URL,
     changeOrigin: true,
+    onError: (err, req, res) => {
+      console.error("Proxy Image Error:", err.message);
+      res.status(502).send("Image proxy connection error");
+    },
   })
 );
 
