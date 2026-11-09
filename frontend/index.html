@@ -125,10 +125,6 @@
         <span class="nav-icon">⚙️</span>
         <span>Settings</span>
       </div>
-      <div class="nav-item" id="nav-setup" onclick="showSection('setup')">
-        <span class="nav-icon">🚀</span>
-        <span>Setup Guide</span>
-      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -323,9 +319,9 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
             <div class="form-group">
               <label class="form-label">Facebook Page ID</label>
-              <input type="text" class="form-input" id="setting-fb_page_id"
-                placeholder="e.g. 123456789012345" />
-              <div class="form-hint">Found in your Facebook Page settings or URL</div>
+              <input type="password" class="form-input" id="setting-fb_page_id"
+                placeholder="Page ID is protected" autocomplete="off" />
+              <div class="form-hint">Hidden for privacy and security</div>
             </div>
 
             <div class="form-group">
@@ -352,102 +348,6 @@
       </div>
     </section>
 
-    <!-- SETUP GUIDE SECTION -->
-    <section class="page-section" id="section-setup">
-      <div class="setup-wizard">
-        <div class="wizard-header">
-          <span class="wizard-emoji">🕌</span>
-          <h1 class="wizard-title">Setup Guide</h1>
-          <p class="wizard-desc">Follow these steps to connect your AI system to Facebook and start publishing Quranic content automatically.</p>
-        </div>
-
-        <div class="wizard-steps">
-          <div class="wizard-step">
-            <div class="step-num">1</div>
-            <div>
-              <div class="step-title">🤖 Get Google Gemini API Key (Free)</div>
-              <div class="step-desc">
-                Go to <a href="https://aistudio.google.com" target="_blank" class="step-link">aistudio.google.com</a>
-                → Sign in with Google → Click "Get API Key" → Create API Key.
-                Free tier gives you 1,500 requests/day — more than enough for daily Islamic posts.
-                Copy and paste the key in Settings → AI Settings.
-              </div>
-            </div>
-          </div>
-
-          <div class="wizard-step">
-            <div class="step-num">2</div>
-            <div>
-              <div class="step-title">📘 Create a Facebook App</div>
-              <div class="step-desc">
-                Go to <a href="https://developers.facebook.com" target="_blank" class="step-link">developers.facebook.com</a>
-                → "My Apps" → "Create App" → Select "Business" type → Fill in app name (e.g. "Islamic Posts Bot").
-                Your app will give you access to the Graph API for publishing posts.
-              </div>
-            </div>
-          </div>
-
-          <div class="wizard-step">
-            <div class="step-num">3</div>
-            <div>
-              <div class="step-title">🔑 Get Your Page Access Token</div>
-              <div class="step-desc">
-                In your Facebook App → "Tools" → "Graph API Explorer" → 
-                Select your app → Select your Facebook Page from the dropdown → 
-                Click "Generate Access Token" → Grant permissions: 
-                <strong>pages_manage_posts</strong>, <strong>pages_read_engagement</strong>, <strong>publish_to_groups</strong>.
-                Then use the Token Debugger to extend it to a long-lived token (60 days).
-              </div>
-            </div>
-          </div>
-
-          <div class="wizard-step">
-            <div class="step-num">4</div>
-            <div>
-              <div class="step-title">🆔 Find Your Facebook Page ID</div>
-              <div class="step-desc">
-                Go to your Facebook Page → Click "About" → Scroll down to find Page ID.
-                Alternatively, go to <strong>facebook.com/your-page-name</strong>, then append 
-                <strong>/?fields=id</strong> after your page URL while logged in. 
-                Or use the Graph API Explorer: <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px">me/accounts</code>
-              </div>
-            </div>
-          </div>
-
-          <div class="wizard-step">
-            <div class="step-num">5</div>
-            <div>
-              <div class="step-title">⚙️ Configure & Test</div>
-              <div class="step-desc">
-                Go to Settings → paste your Gemini API Key, Facebook Page ID, and Access Token.
-                Disable "Mock Mode" to enable real publishing.
-                Click "Validate Facebook Connection" to verify everything works.
-                Then click "Generate Now" to create your first Islamic post and approve it!
-              </div>
-            </div>
-          </div>
-
-          <div class="wizard-step">
-            <div class="step-num">6</div>
-            <div>
-              <div class="step-title">🌙 Done! Enjoy Daily Quranic Posts</div>
-              <div class="step-desc">
-                Every day at your scheduled time, the system will automatically generate a new Quranic post
-                with Arabic ayat, Urdu tarjuma, tafseer, and a beautiful Islamic image.
-                You'll review it in the Approval Queue and publish with one click. بارک اللہ فیک!
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="text-align:center">
-          <button class="btn btn-primary" onclick="showSection('settings')">
-            ⚙️ Go to Settings to Configure
-          </button>
-        </div>
-      </div>
-    </section>
-
   </main>
 
   <!-- MOBILE BOTTOM NAVIGATION -->
@@ -464,10 +364,6 @@
     <div class="bottom-nav-item" id="bnav-settings" onclick="showSection('settings')">
       <span class="bnav-icon">⚙️</span>
       <span class="bnav-label">Settings</span>
-    </div>
-    <div class="bottom-nav-item" id="bnav-setup" onclick="showSection('setup')">
-      <span class="bnav-icon">🚀</span>
-      <span class="bnav-label">Setup</span>
     </div>
   </nav>
 

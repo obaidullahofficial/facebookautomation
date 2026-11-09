@@ -201,6 +201,10 @@ app.get("/api/settings", (req, res) => {
   try {
     const settings = getAllSettings();
     // Mask sensitive keys partially
+    if (settings.fb_page_id && settings.fb_page_id.length > 6) {
+      settings.fb_page_id_masked =
+        settings.fb_page_id.substring(0, 4) + "..." + settings.fb_page_id.slice(-3);
+    }
     if (settings.fb_access_token && settings.fb_access_token.length > 10) {
       settings.fb_access_token_masked =
         settings.fb_access_token.substring(0, 8) + "..." + settings.fb_access_token.slice(-4);
@@ -232,7 +236,14 @@ app.put("/api/settings", (req, res) => {
     ];
 
     allowedKeys.forEach((key) => {
-      if (updates[key] !== undefined) {
+      if (updates[key] !== undefined && updates[key] !== "") {
+        // Prevent accidental overwrite if a masked placeholder containing '...' was posted
+        if (
+          (key === "fb_page_id" || key === "fb_access_token" || key === "gemini_api_key") &&
+          String(updates[key]).includes("...")
+        ) {
+          return;
+        }
         setSetting(key, updates[key]);
       }
     });
