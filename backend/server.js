@@ -183,6 +183,17 @@ app.post("/api/posts/:id/regenerate-image", async (req, res) => {
   }
 });
 
+// POST publish next approved post from FIFO queue
+app.post("/api/posts/publish-next", async (req, res) => {
+  try {
+    const { runScheduledPublishing } = require("./scheduler");
+    const result = await runScheduledPublishing();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ─── SETTINGS API ────────────────────────────────────────────────────────────
 
 // GET all settings
@@ -211,6 +222,8 @@ app.put("/api/settings", (req, res) => {
     const allowedKeys = [
       "schedule_time",
       "schedule_enabled",
+      "publish_schedule_time",
+      "publish_enabled",
       "fb_page_id",
       "fb_access_token",
       "gemini_api_key",
@@ -224,8 +237,13 @@ app.put("/api/settings", (req, res) => {
       }
     });
 
-    // Restart scheduler if time changed
-    if (updates.schedule_time || updates.schedule_enabled !== undefined) {
+    // Restart scheduler if schedule or publish settings changed
+    if (
+      updates.schedule_time ||
+      updates.schedule_enabled !== undefined ||
+      updates.publish_schedule_time ||
+      updates.publish_enabled !== undefined
+    ) {
       restartScheduler();
     }
 

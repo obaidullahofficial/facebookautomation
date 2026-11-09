@@ -192,10 +192,24 @@ function renderHistoryTable() {
     return;
   }
 
+  const approvedQueue = allPosts
+    .filter((p) => p.status === "approved")
+    .sort((a, b) => new Date(a.updated_at || a.created_at) - new Date(b.updated_at || b.created_at));
+
   tbody.innerHTML = allPosts.map((post) => {
     const date = new Date(post.created_at).toLocaleDateString("en-PK", { day:"numeric", month:"short", year:"numeric" });
     const statusClass = `badge-${post.status}`;
-    const statusLabel = post.status.charAt(0).toUpperCase() + post.status.slice(1);
+    let statusLabel = post.status.charAt(0).toUpperCase() + post.status.slice(1);
+
+    if (post.status === "approved") {
+      const qIndex = approvedQueue.findIndex((p) => p.id === post.id);
+      statusLabel = qIndex >= 0 ? `Queued #${qIndex + 1} (FIFO)` : "Approved (In Queue)";
+    }
+
+    let statusSubtext = "";
+    if (post.status === "published" && post.fb_post_id) {
+      statusSubtext = `<div style="font-size:10px;color:var(--text-muted);margin-top:2px">FB: ${escHtml(post.fb_post_id)}</div>`;
+    }
 
     let rowActions = `<button class="btn btn-ghost btn-sm" onclick="openEditModal(${post.id})" title="Edit Post">✏️</button>`;
     rowActions += `<button class="btn btn-ghost btn-sm" onclick="previewPost(${post.id})" title="Preview">👁️</button>`;
@@ -217,7 +231,10 @@ function renderHistoryTable() {
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);font-size:12px">
         ${escHtml(post.tafseer.substring(0, 60))}...
       </td>
-      <td><span class="post-status-badge ${statusClass}" style="position:static">${statusLabel}</span></td>
+      <td>
+        <span class="post-status-badge ${statusClass}" style="position:static">${statusLabel}</span>
+        ${statusSubtext}
+      </td>
       <td style="color:var(--text-muted);font-size:12px">${date}</td>
       <td><div style="display:flex;gap:6px">${rowActions}</div></td>
     </tr>`;
@@ -478,7 +495,13 @@ function applySettingsToForm(s) {
   if (timeEl && s.schedule_time) timeEl.value = s.schedule_time;
 
   const schedEl = document.getElementById("setting-schedule_enabled");
-  if (schedEl) schedEl.checked = s.schedule_enabled === "true";
+  if (schedEl) schedEl.checked = s.schedule_enabled !== "false";
+
+  const pubTimeEl = document.getElementById("setting-publish_schedule_time");
+  if (pubTimeEl && s.publish_schedule_time) pubTimeEl.value = s.publish_schedule_time;
+
+  const pubSchedEl = document.getElementById("setting-publish_enabled");
+  if (pubSchedEl) pubSchedEl.checked = s.publish_enabled !== "false";
 
   const mockEl = document.getElementById("setting-mock_mode");
   if (mockEl) mockEl.checked = s.mock_mode === "true";
@@ -497,6 +520,8 @@ async function saveSettings() {
   const payload = {
     schedule_time: document.getElementById("setting-schedule_time")?.value || "09:00",
     schedule_enabled: document.getElementById("setting-schedule_enabled")?.checked ? "true" : "false",
+    publish_schedule_time: document.getElementById("setting-publish_schedule_time")?.value || "10:00",
+    publish_enabled: document.getElementById("setting-publish_enabled")?.checked ? "true" : "false",
     mock_mode: document.getElementById("setting-mock_mode")?.checked ? "true" : "false",
     fb_page_id: document.getElementById("setting-fb_page_id")?.value.trim() || "",
   };

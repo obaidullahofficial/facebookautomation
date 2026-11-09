@@ -16,6 +16,8 @@ const DEFAULT_DB = {
   settings: {
     schedule_time: "09:00",
     schedule_enabled: "true",
+    publish_schedule_time: "10:00",
+    publish_enabled: "true",
     fb_page_id: "",
     fb_access_token: "",
     gemini_api_key: "",
@@ -67,6 +69,13 @@ function getAllPosts() {
 
 function getPendingPosts() {
   return getAllPosts().filter((p) => p.status === "pending");
+}
+
+function getApprovedPosts() {
+  const db = readDB();
+  return db.posts
+    .filter((p) => p.status === "approved")
+    .sort((a, b) => new Date(a.updated_at || a.created_at) - new Date(b.updated_at || b.created_at));
 }
 
 function getPostById(id) {
@@ -174,6 +183,7 @@ function clearAllPosts() {
 const queries = {
   getAllPosts:         { all: getAllPosts },
   getPendingPosts:    { all: getPendingPosts },
+  getApprovedPosts:   { all: getApprovedPosts },
   getPostById:        { get: getPostById },
   createPost:         { run: createPost },
   updatePostStatus:   { run: updatePostStatus },

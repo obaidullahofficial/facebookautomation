@@ -242,21 +242,38 @@
 
         <!-- Scheduler Settings -->
         <div class="settings-card">
-          <div class="settings-card-title">⏰ Scheduler Settings</div>
+          <div class="settings-card-title">⏰ Scheduler & Auto-Publish Settings</div>
 
           <div class="form-group">
-            <label class="form-label">Daily Post Time (Pakistan Time)</label>
+            <label class="form-label">Daily Post Generation Time (Pakistan Time)</label>
             <input type="time" class="form-input" id="setting-schedule_time" value="09:00" />
             <div class="form-hint">New post will be generated daily at this time (Asia/Karachi timezone)</div>
           </div>
 
           <div class="toggle-row">
             <div>
-              <div class="toggle-label">Auto-Schedule Enabled</div>
-              <div class="toggle-desc">Generate posts automatically every day</div>
+              <div class="toggle-label">Auto-Generation Enabled</div>
+              <div class="toggle-desc">Automatically generate posts into Approval Queue</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="setting-schedule_enabled" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="form-group" style="margin-top:16px">
+            <label class="form-label">Daily Auto-Publish Time (Pakistan Time)</label>
+            <input type="time" class="form-input" id="setting-publish_schedule_time" value="10:00" />
+            <div class="form-hint">Publishes the oldest approved post (FIFO) to Facebook at this time</div>
+          </div>
+
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Auto-Publishing Enabled (FIFO Queue)</div>
+              <div class="toggle-desc">Publish one approved post from queue at scheduled interval</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="setting-publish_enabled" checked />
               <span class="toggle-slider"></span>
             </label>
           </div>
