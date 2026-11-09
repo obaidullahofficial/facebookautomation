@@ -44,6 +44,20 @@ function getTodaysAyat(postCount) {
   return AYAT_POOL[index];
 }
 
+function cleanCaption(caption) {
+  if (!caption) return "";
+  return caption
+    // Remove starting header variations: "|🌙 آج کی آیت | Ayat of the Day ✨|", "🌙 آج کی آیت | Ayat of the Day ✨", etc.
+    .replace(/^(\s*\|?\s*🌙?\s*آج کی آیت\s*\|\s*Ayat of the Day\s*✨?\s*\|?\s*\n*)+/i, "")
+    .replace(/^\s*Ayat of the Day\s*[-–—:]*\s*\n*/i, "")
+    .replace(/^\s*آج کی آیت\s*[-–—:]*\s*\n*/i, "")
+    // Remove CTA line: "آپ کے نزدیک اس آیت کا کیا درس ہے؟ کمنٹ میں ضرور بتائیں 👇"
+    .replace(/\n*.*آپ کے نزدیک اس آیت کا کیا درس ہے.*$/gim, "")
+    .replace(/\n*.*کمنٹ میں ضرور بتائیں.*$/gim, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 async function generatePostContent(geminiApiKey, postCount = 0) {
   const ayatData = getTodaysAyat(postCount);
 
@@ -55,7 +69,11 @@ async function generatePostContent(geminiApiKey, postCount = 0) {
     const genAI = new GoogleGenerativeAI(geminiApiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = `You are an authentic Islamic scholar creating content for a Facebook page in Urdu. Create a beautiful, engaging post about this Quranic Ayat with the Tafseer / Reflection written entirely in pure, eloquent Urdu:
+    const prompt = `You are an authentic Islamic scholar creating content for a Facebook page in Urdu. Create a beautiful, engaging post about this Quranic Ayat with the Tafseer / Reflection written entirely in pure, eloquent Urdu.
+
+IMPORTANT FORMAT RULES:
+1. DO NOT include headers like "آج کی آیت" or "Ayat of the Day" at the start. Start directly with the Quranic Ayat: ﴿ ${ayatData.arabic} ﴾
+2. DO NOT include ending question lines like "آپ کے نزدیک اس آیت کا کیا درس ہے؟ کمنٹ میں ضرور بتائیں 👇" or any comment call-to-action. End with the dua.
 
 Surah: ${ayatData.surah}
 Ayat Number: ${ayatData.number}
@@ -70,7 +88,7 @@ Please respond with ONLY valid JSON (no markdown, no code blocks) in this exact 
   "ayat_number": "${ayatData.number}",
   "urdu_translation": "${ayatData.urdu}",
   "tafseer": "تفسیر اور تدبر: سورۃ ${ayatData.surah} کی اس مبارک آیت کا مفہوم انتہائی گہرا اور دل کو چھونے والا ہے۔ اس میں اللہ تعالیٰ نے بندوں کو صبر، شکر، اور توکل کا درس دیا ہے جو کہ انسانی زندگی کے ہر موڑ پر رہنما ہے۔ ہمیں اس کلام پاک پر غور کر کے اپنی دنیا و آخرت سنوارنی چاہیے",
-  "caption": "🌙 آج کی آیت | Ayat of the Day ✨\n\n﴿ ${ayatData.arabic} ﴾\n\nسورۃ ${ayatData.surah} - آیت ${ayatData.number}\n\n📖 ترجمہ: ${ayatData.urdu}\n\n💫 تفسیر اور تدبر: سورۃ ${ayatData.surah} کی اس مبارک آیت کا مفہوم انتہائی گہرا اور دل کو چھونے والا ہے۔ اس میں اللہ تعالیٰ نے بندوں کو صبر، شکر، اور توکل کا درس دیا ہے جو کہ انسانی زندگی کے ہر موڑ پر رہنما ہے۔ ہمیں اس کلام پاک پر غور کر کے اپنی دنیا و آخرت سنوارنی چاہیے\n\n🤲 دعا ہے کہ اللہ تعالی ہمیں اس پر عمل کرنے کی توفیق عطا فرمائے۔ آمین!\n\nآپ کے نزدیک اس آیت کا کیا درس ہے؟ کمنٹ میں ضرور بتائیں 👇",
+  "caption": "﴿ ${ayatData.arabic} ﴾\\n\\nسورۃ ${ayatData.surah} - آیت ${ayatData.number}\\n\\n📖 ترجمہ: ${ayatData.urdu}\\n\\n💫 تفسیر اور تدبر: سورۃ ${ayatData.surah} کی اس مبارک آیت کا مفہوم انتہائی گہرا اور دل کو چھونے والا ہے۔ اس میں اللہ تعالیٰ نے بندوں کو صبر، شکر، اور توکل کا درس دیا ہے جو کہ انسانی زندگی کے ہر موڑ پر رہنما ہے۔ ہمیں اس کلام پاک پر غور کر کے اپنی دنیا و آخرت سنوارنی چاہیے\\n\\n🤲 دعا ہے کہ اللہ تعالی ہمیں اس پر عمل کرنے کی توفیق عطا فرمائے۔ آمین!",
   "hashtags": "#QuranDaily #IslamicPost #QuranicWisdom #IslamicQuotes #Quran #Islam #DailyIslam #QuranicVerse #قرآن #اسلام",
   "image_prompt": "Serene Islamic art background with tulip corner accent"
 }`;
@@ -96,7 +114,7 @@ Please respond with ONLY valid JSON (no markdown, no code blocks) in this exact 
       ayat_number: parsed.ayat_number || ayatData.number,
       urdu_translation: parsed.urdu_translation || ayatData.urdu,
       tafseer: parsed.tafseer,
-      caption: parsed.caption,
+      caption: cleanCaption(parsed.caption),
       hashtags: parsed.hashtags,
       image_prompt: parsed.image_prompt,
     };
@@ -108,13 +126,15 @@ Please respond with ONLY valid JSON (no markdown, no code blocks) in this exact 
 }
 
 function generateMockContent(ayatData) {
+  const caption = `﴿ ${ayatData.arabic} ﴾\n\nسورۃ ${ayatData.surah} - آیت ${ayatData.number}\n\n📖 ترجمہ: ${ayatData.urdu}\n\n💫 تفسیر و فہم: سورۃ ${ayatData.surah} کی یہ مبارک آیت ہمیں صبر، شکر اور اللہ تعالیٰ کی حکمت کا درس دیتی ہے۔ ${ayatData.urdu} کے تحت یہ آیت انسان کو زندگی کے ہر قدم پر توکل اور استقامت کی تلقین کرتی ہے۔\n\n🤲 دعا ہے کہ اللہ تعالی ہمیں اس پر عمل کرنے کی توفیق عطا فرمائے۔ آمین!`;
+
   return {
     ayat: ayatData.arabic,
     surah: ayatData.surah,
     ayat_number: ayatData.number,
     urdu_translation: ayatData.urdu,
     tafseer: `تفسیر و فہم: سورۃ ${ayatData.surah} کی یہ مبارک آیت ہمیں صبر، شکر اور اللہ تعالیٰ کی حکمت کا درس دیتی ہے۔ ${ayatData.urdu} کے تحت یہ آیت انسان کو زندگی کے ہر قدم پر توکل اور استقامت کی تلقین کرتی ہے۔`,
-    caption: `🌙 آج کی آیت | Ayat of the Day ✨\n\n﴿ ${ayatData.arabic} ﴾\n\nسورۃ ${ayatData.surah} - آیت ${ayatData.number}\n\n📖 ترجمہ: ${ayatData.urdu}\n\n💫 تفسیر و فہم: سورۃ ${ayatData.surah} کی یہ مبارک آیت ہمیں صبر، شکر اور اللہ تعالیٰ کی حکمت کا درس دیتی ہے۔ ${ayatData.urdu} کے تحت یہ آیت انسان کو زندگی کے ہر قدم پر توکل اور استقامت کی تلقین کرتی ہے۔\n\n🤲 دعا ہے کہ اللہ تعالی ہمیں اس پر عمل کرنے کی توفیق عطا فرمائے۔ آمین!\n\nآپ کے نزدیک اس آیت کا کیا درس ہے؟ کمنٹ میں ضرور بتائیں 👇`,
+    caption: cleanCaption(caption),
     hashtags: "#QuranDaily #IslamicPost #QuranicWisdom #IslamicQuotes #Quran #Islam #DailyIslam #QuranicVerse #قرآن #اسلام",
     image_prompt: "Serene Islamic art background with tulip corner accent",
   };

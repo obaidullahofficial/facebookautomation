@@ -159,10 +159,11 @@ async function createComposedImage(post) {
       ctx.fillText(line, width / 2, currentY + (index * urduLineHeight));
     });
 
-    // 9. Footer branding
-    ctx.fillStyle = "#8c5d1e";
-    ctx.font = "bold 20px 'Segoe UI', Arial, sans-serif";
-    ctx.fillText("Obaidullah", width / 2, 900);
+    // 9. Footer subtle signature (low-prominence / unhighlighted)
+    ctx.fillStyle = "rgba(140, 93, 30, 0.32)";
+    ctx.font = "400 13px 'Segoe UI', Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Obaidullah", width / 2, 908);
 
     // Save output
     const fileName = `post_${post.id || Date.now()}.png`;
