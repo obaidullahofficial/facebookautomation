@@ -87,6 +87,43 @@ app.put("/api/posts/:id/reject", (req, res) => {
   }
 });
 
+// PUT edit post content (Ayat, translation, tafseer, caption, etc.)
+app.put("/api/posts/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const existing = queries.getPostById.get(id);
+    if (!existing) return res.status(404).json({ success: false, error: "Post not found" });
+
+    const updates = req.body;
+    let post = queries.updatePost.run(id, updates);
+
+    // If text on image changed, re-render the composed picture
+    const textOnImageChanged =
+      (updates.ayat && updates.ayat !== existing.ayat) ||
+      (updates.surah && updates.surah !== existing.surah) ||
+      (updates.ayat_number && updates.ayat_number !== existing.ayat_number) ||
+      (updates.urdu_translation && updates.urdu_translation !== existing.urdu_translation) ||
+      updates.recomposeImage === true;
+
+    if (textOnImageChanged) {
+      try {
+        const { createComposedImage } = require("./imageComposer");
+        const newImg = await createComposedImage(post);
+        post = queries.updatePost.run(id, {
+          image_url: newImg.url,
+          image_local_path: newImg.local_path || "",
+        });
+      } catch (imgErr) {
+        console.error("Failed to recompose image on edit:", imgErr.message);
+      }
+    }
+
+    res.json({ success: true, post, message: "Post updated successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // POST publish approved post to Facebook
 app.post("/api/posts/:id/publish", async (req, res) => {
   try {

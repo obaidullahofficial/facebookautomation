@@ -132,11 +132,13 @@ function createPostCard(post, showActions) {
       <button class="btn btn-primary btn-sm" onclick="publishPost(${post.id})">📤 Publish to FB</button>
       ${post.status === "pending" ? `<button class="btn btn-success btn-sm" onclick="approvePost(${post.id})">✅ Approve</button>` : ""}
       <button class="btn btn-danger btn-sm" onclick="rejectPost(${post.id})">❌ Reject</button>
+      <button class="btn btn-ghost btn-sm" onclick="openEditModal(${post.id})">✏️ Edit</button>
       <button class="btn btn-ghost btn-sm" onclick="previewPost(${post.id})">👁️ Preview</button>
       <button class="btn btn-ghost btn-sm" onclick="regenerateImage(${post.id})">🖼️ Regenerate</button>
       <a href="${getImageUrl(post.image_url)}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank">📥 Download</a>
     </div>` : `
     <div class="post-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openEditModal(${post.id})">✏️ Edit</button>
       <button class="btn btn-ghost btn-sm" onclick="previewPost(${post.id})">👁️ Preview</button>
       <a href="${getImageUrl(post.image_url)}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank">📥 Download</a>
     </div>`;
@@ -174,14 +176,15 @@ function renderHistoryTable() {
     const statusClass = `badge-${post.status}`;
     const statusLabel = post.status.charAt(0).toUpperCase() + post.status.slice(1);
 
-    let rowActions = `<button class="btn btn-ghost btn-sm" onclick="previewPost(${post.id})">👁️</button>`;
-    rowActions += `<a href="${getImageUrl(post.image_url)}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank">📥</a>`;
+    let rowActions = `<button class="btn btn-ghost btn-sm" onclick="openEditModal(${post.id})" title="Edit Post">✏️</button>`;
+    rowActions += `<button class="btn btn-ghost btn-sm" onclick="previewPost(${post.id})" title="Preview">👁️</button>`;
+    rowActions += `<a href="${getImageUrl(post.image_url)}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank" title="Download Image">📥</a>`;
     if (post.status === "pending") {
       rowActions += `
-        <button class="btn btn-success btn-sm" onclick="approvePost(${post.id})">✅</button>
-        <button class="btn btn-danger btn-sm" onclick="rejectPost(${post.id})">❌</button>`;
+        <button class="btn btn-success btn-sm" onclick="approvePost(${post.id})" title="Approve">✅</button>
+        <button class="btn btn-danger btn-sm" onclick="rejectPost(${post.id})" title="Reject">❌</button>`;
     } else if (post.status === "approved") {
-      rowActions += `<button class="btn btn-primary btn-sm" onclick="publishPost(${post.id})">📤</button>`;
+      rowActions += `<button class="btn btn-primary btn-sm" onclick="publishPost(${post.id})" title="Publish">📤</button>`;
     }
 
     return `<tr id="row-${post.id}">
@@ -319,6 +322,7 @@ function previewPost(id) {
       ${post.image_url ? `<img src="${getImageUrl(post.image_url)}" style="width:100%;border-radius:12px;margin-bottom:16px" alt="Post image" onerror="this.style.display='none'" />` : ""}
       <div style="display:flex;gap:10px;margin-bottom:16px">
         <a href="${getImageUrl(post.image_url)}" download="Islamic_Post_${post.id}.png" class="btn btn-primary btn-sm" target="_blank">📥 Download Image</a>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal();openEditModal(${post.id})">✏️ Edit Content</button>
       </div>
       <div style="font-family:'Jameel Noori Nastaleeq', 'Noto Naskh Arabic', serif;direction:rtl;text-align:right;font-size:16px;color:var(--text-secondary);line-height:1.8;margin-bottom:14px;padding:12px;border-right:3px solid var(--accent-teal);padding-right:14px;background:rgba(255,255,255,0.03);border-radius:8px">
         <strong style="color:var(--accent-gold);display:block;margin-bottom:6px;font-family:'Inter',sans-serif;direction:ltr;text-align:left">📚 Tafseer / Reflection (تفسیر و فہم):</strong>
@@ -344,6 +348,85 @@ function previewPost(id) {
 
 function closeModal() {
   document.getElementById("previewModal").classList.remove("show");
+}
+
+// ── EDIT POST MODAL ──────────────────────────────────────────────────────────
+function openEditModal(id) {
+  const post = allPosts.find((p) => p.id === id);
+  if (!post) return;
+
+  document.getElementById("edit-post-id").value = post.id;
+  document.getElementById("edit-ayat").value = post.ayat || "";
+  document.getElementById("edit-surah").value = post.surah || "";
+  document.getElementById("edit-ayat_number").value = post.ayat_number || "";
+  document.getElementById("edit-urdu_translation").value = post.urdu_translation || "";
+  document.getElementById("edit-tafseer").value = post.tafseer || "";
+  document.getElementById("edit-caption").value = post.caption || "";
+  document.getElementById("edit-hashtags").value = post.hashtags || "";
+
+  const recomposeEl = document.getElementById("edit-recompose");
+  if (recomposeEl) recomposeEl.checked = true;
+
+  document.getElementById("editModal").classList.add("show");
+}
+
+function closeEditModal() {
+  document.getElementById("editModal").classList.remove("show");
+}
+
+async function savePostEdit(event) {
+  event.preventDefault();
+  const id = document.getElementById("edit-post-id").value;
+  if (!id) return;
+
+  const payload = {
+    ayat: document.getElementById("edit-ayat").value.trim(),
+    surah: document.getElementById("edit-surah").value.trim(),
+    ayat_number: document.getElementById("edit-ayat_number").value.trim(),
+    urdu_translation: document.getElementById("edit-urdu_translation").value.trim(),
+    tafseer: document.getElementById("edit-tafseer").value.trim(),
+    caption: document.getElementById("edit-caption").value.trim(),
+    hashtags: document.getElementById("edit-hashtags").value.trim(),
+    recomposeImage: document.getElementById("edit-recompose")?.checked || false,
+  };
+
+  const saveBtn = document.getElementById("saveEditBtn");
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = "⏳ Saving...";
+  }
+
+  showLoader("💾 Saving changes & re-rendering image...");
+  try {
+    const res = await fetch(`${API}/api/posts/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    hideLoader();
+
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "💾 Save Changes";
+    }
+
+    if (data.success) {
+      showToast("✨ Post updated successfully!", "success");
+      closeEditModal();
+      await Promise.all([loadStats(), loadPosts()]);
+      renderHistoryTable();
+    } else {
+      showToast(`❌ Error: ${data.error || "Failed to update"}`, "error");
+    }
+  } catch (e) {
+    hideLoader();
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "💾 Save Changes";
+    }
+    showToast("❌ Failed to update post", "error");
+  }
 }
 
 // ── SETTINGS ─────────────────────────────────────────────────────────────────

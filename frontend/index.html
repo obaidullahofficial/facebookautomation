@@ -28,6 +28,76 @@
   </div>
 </div>
 
+<!-- EDIT POST MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <span class="modal-title">✏️ Edit Islamic Post</span>
+      <button class="modal-close" onclick="closeEditModal()">&times;</button>
+    </div>
+    <form id="editPostForm" onsubmit="savePostEdit(event)">
+      <input type="hidden" id="edit-post-id" />
+
+      <div class="form-group">
+        <label class="form-label">📖 Arabic Ayat Text (قرآنی آیت)</label>
+        <textarea class="form-input" id="edit-ayat" rows="3"
+          style="font-family:'Amiri',serif;direction:rtl;text-align:right;font-size:22px;line-height:1.7" required></textarea>
+        <div class="form-hint">Changing this will automatically re-render the image</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label class="form-label">Surah Name (سورۃ کا نام)</label>
+          <input type="text" class="form-input" id="edit-surah" placeholder="e.g. Al-Baqarah" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ayat Reference (آیت نمبر)</label>
+          <input type="text" class="form-input" id="edit-ayat_number" placeholder="e.g. 2:255" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">🇵🇰 Urdu Translation (اردو ترجمہ)</label>
+        <textarea class="form-input" id="edit-urdu_translation" rows="3"
+          style="font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-align:right;font-size:20px;line-height:1.8" required></textarea>
+        <div class="form-hint">Appears on the tulip card image</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📚 Tafseer / Reflection (تفسیر و فہم)</label>
+        <textarea class="form-input" id="edit-tafseer" rows="4"
+          style="font-family:'Jameel Noori Nastaleeq',serif;direction:rtl;text-align:right;font-size:18px;line-height:1.8"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📝 Facebook Caption (کیپشن)</label>
+        <textarea class="form-input" id="edit-caption" rows="5" style="font-size:13px;line-height:1.6"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">🏷️ Hashtags (ہیش ٹیگز)</label>
+        <input type="text" class="form-input" id="edit-hashtags" />
+      </div>
+
+      <div class="toggle-row" style="margin-bottom:20px">
+        <div>
+          <div class="toggle-label">🖼️ Re-render Image</div>
+          <div class="toggle-desc">Automatically re-generate the 1080x1080 tulip card image with your updated text</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="edit-recompose" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:12px;border-top:1px solid var(--glass-border);padding-top:16px">
+        <button type="button" class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="saveEditBtn">💾 Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="app-container">
 
   <!-- SIDEBAR -->

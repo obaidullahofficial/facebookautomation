@@ -131,6 +131,26 @@ function updatePostImage(imageUrl, localPath, id) {
   writeDB(db);
 }
 
+function updatePost(id, data) {
+  const db = readDB();
+  const post = db.posts.find((p) => p.id === Number(id));
+  if (!post) return null;
+
+  if (data.ayat !== undefined) post.ayat = data.ayat;
+  if (data.surah !== undefined) post.surah = data.surah;
+  if (data.ayat_number !== undefined) post.ayat_number = data.ayat_number;
+  if (data.urdu_translation !== undefined) post.urdu_translation = data.urdu_translation;
+  if (data.tafseer !== undefined) post.tafseer = data.tafseer;
+  if (data.caption !== undefined) post.caption = data.caption;
+  if (data.hashtags !== undefined) post.hashtags = data.hashtags;
+  if (data.image_url !== undefined) post.image_url = data.image_url;
+  if (data.image_local_path !== undefined) post.image_local_path = data.image_local_path;
+
+  post.updated_at = new Date().toISOString();
+  writeDB(db);
+  return post;
+}
+
 function getStats() {
   const posts = getAllPosts();
   return {
@@ -151,6 +171,7 @@ const queries = {
   updatePostStatus:   { run: updatePostStatus },
   updatePostPublished:{ run: updatePostPublished },
   updatePostImage:    { run: updatePostImage },
+  updatePost:         { run: updatePost },
   getStats:           { get: getStats },
 };
 
