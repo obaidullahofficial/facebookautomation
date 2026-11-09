@@ -1,0 +1,29 @@
+name: Deploy Backend to Oracle VPS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ORACLE_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 129.225.93.30 >> ~/.ssh/known_hosts
+
+      - name: Deploy to Oracle VPS via SSH
+        run: |
+          ssh ubuntu@129.225.93.30 << 'EOF'
+            cd /home/ubuntu/facebookautomation
+            git pull origin main
+            npm install --omit=dev
+            pm2 restart islamic-backend
+            pm2 save
+          EOF

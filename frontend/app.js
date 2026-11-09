@@ -1,4 +1,12 @@
-const API = "";
+const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? ""
+  : "http://129.225.93.30:8080";
+
+function getImageUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${API}${url}`;
+}
 
 let allPosts = [];
 let settings = {};
@@ -118,25 +126,21 @@ function createPostCard(post, showActions) {
   });
 
   const imageHtml = post.image_url
-    ? `<img src="${post.image_url}" alt="Islamic post image" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'post-image-placeholder\\'>🕌</div>'" />`
+    ? `<img src="${getImageUrl(post.image_url)}" alt="Islamic post image" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'post-image-placeholder\\'>🕌</div>'" />`
     : `<div class="post-image-placeholder">🕌</div>`;
 
-  const actions = showActions && post.status === "pending" ? `
+  const actions = showActions && (post.status === "pending" || post.status === "approved") ? `
     <div class="post-actions">
-      <button class="btn btn-success btn-sm" onclick="approvePost(${post.id})">✅ Approve</button>
+      <button class="btn btn-primary btn-sm" onclick="publishPost(${post.id})">📤 Publish to FB</button>
+      ${post.status === "pending" ? `<button class="btn btn-success btn-sm" onclick="approvePost(${post.id})">✅ Approve</button>` : ""}
       <button class="btn btn-danger btn-sm" onclick="rejectPost(${post.id})">❌ Reject</button>
       <button class="btn btn-ghost btn-sm" onclick="previewPost(${post.id})">👁️ Preview</button>
       <button class="btn btn-ghost btn-sm" onclick="regenerateImage(${post.id})">🖼️ Regenerate</button>
-      <a href="${post.image_url}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank">📥 Download</a>
-    </div>` : post.status === "approved" ? `
-    <div class="post-actions">
-      <button class="btn btn-primary btn-sm" onclick="publishPost(${post.id})">📤 Publish to FB</button>
-      <button class="btn btn-ghost btn-sm" onclick="previewPost(${post.id})">👁️ Preview</button>
-      <a href="${post.image_url}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank">📥 Download</a>
+      <a href="${getImageUrl(post.image_url)}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank">📥 Download</a>
     </div>` : `
     <div class="post-actions">
       <button class="btn btn-ghost btn-sm" onclick="previewPost(${post.id})">👁️ Preview</button>
-      <a href="${post.image_url}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank">📥 Download</a>
+      <a href="${getImageUrl(post.image_url)}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank">📥 Download</a>
     </div>`;
 
   return `
@@ -173,7 +177,7 @@ function renderHistoryTable() {
     const statusLabel = post.status.charAt(0).toUpperCase() + post.status.slice(1);
 
     let rowActions = `<button class="btn btn-ghost btn-sm" onclick="previewPost(${post.id})">👁️</button>`;
-    rowActions += `<a href="${post.image_url}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank">📥</a>`;
+    rowActions += `<a href="${getImageUrl(post.image_url)}" download="Islamic_Post_${post.id}.png" class="btn btn-ghost btn-sm" target="_blank">📥</a>`;
     if (post.status === "pending") {
       rowActions += `
         <button class="btn btn-success btn-sm" onclick="approvePost(${post.id})">✅</button>
@@ -314,9 +318,9 @@ function previewPost(id) {
 
   document.getElementById("modalContent").innerHTML = `
     <div style="margin-bottom:16px">
-      ${post.image_url ? `<img src="${post.image_url}" style="width:100%;border-radius:12px;margin-bottom:16px" alt="Post image" onerror="this.style.display='none'" />` : ""}
+      ${post.image_url ? `<img src="${getImageUrl(post.image_url)}" style="width:100%;border-radius:12px;margin-bottom:16px" alt="Post image" onerror="this.style.display='none'" />` : ""}
       <div style="display:flex;gap:10px;margin-bottom:16px">
-        <a href="${post.image_url}" download="Islamic_Post_${post.id}.png" class="btn btn-primary btn-sm" target="_blank">📥 Download Image</a>
+        <a href="${getImageUrl(post.image_url)}" download="Islamic_Post_${post.id}.png" class="btn btn-primary btn-sm" target="_blank">📥 Download Image</a>
       </div>
       <div style="font-family:'Jameel Noori Nastaleeq', 'Noto Naskh Arabic', serif;direction:rtl;text-align:right;font-size:16px;color:var(--text-secondary);line-height:1.8;margin-bottom:14px;padding:12px;border-right:3px solid var(--accent-teal);padding-right:14px;background:rgba(255,255,255,0.03);border-radius:8px">
         <strong style="color:var(--accent-gold);display:block;margin-bottom:6px;font-family:'Inter',sans-serif;direction:ltr;text-align:left">📚 Tafseer / Reflection (تفسیر و فہم):</strong>
