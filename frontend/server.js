@@ -3,14 +3,14 @@ const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const BACKEND_URL = process.env.BACKEND_URL || "http://129.225.93.30:8080";
+const BACKEND_URL = process.env.BACKEND_URL || "https://api.fluxpropel.com";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Direct proxy for /api/* to Oracle VPS
+// Direct proxy for /api/* to Oracle VPS Nginx (/fb-api/*)
 app.use("/api", async (req, res) => {
-  const targetUrl = `${BACKEND_URL}/api${req.url}`;
+  const targetUrl = `${BACKEND_URL}/fb-api${req.url}`;
   try {
     const headers = { ...req.headers };
     delete headers.host;
