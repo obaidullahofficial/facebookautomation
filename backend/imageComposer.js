@@ -160,8 +160,8 @@ async function createComposedImage(post) {
     });
 
     // 9. Footer subtle signature (low-prominence / unhighlighted)
-    ctx.fillStyle = "rgba(140, 93, 30, 0.32)";
-    ctx.font = "400 13px 'Segoe UI', Arial, sans-serif";
+    ctx.fillStyle = "rgba(140, 93, 30, 0.38)";
+    ctx.font = "400 17px 'Segoe UI', Arial, sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("Obaidullah", width / 2, 908);
 
