@@ -1,0 +1,13 @@
+{
+  "posts": [],
+  "settings": {
+    "schedule_time": "09:00",
+    "schedule_enabled": "true",
+    "fb_page_id": "",
+    "fb_access_token": "",
+    "gemini_api_key": "",
+    "mock_mode": "true",
+    "setup_complete": "false"
+  },
+  "_nextId": 1
+}

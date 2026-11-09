@@ -1,0 +1,358 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Islamic FB Automation | AI Post Dashboard</title>
+  <meta name="description" content="AI-powered Islamic Facebook automation system. Auto-generate Quranic ayat posts with Urdu translations and publish them to your Facebook page." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>" />
+</head>
+<body>
+
+<div id="loader" class="loader-overlay">
+  <div class="loader-spinner"></div>
+  <div class="loader-text" id="loaderText">Generating Islamic post...</div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- PREVIEW MODAL -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📋 Full Post Preview</span>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="app-container">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🌙</span>
+      <div class="logo-title">Islamic Auto Post</div>
+      <div class="logo-subtitle">AI-Powered Facebook System</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <div class="nav-item active" id="nav-approval" onclick="showSection('approval')">
+        <span class="nav-icon">✅</span>
+        <span>Approval Queue</span>
+        <span class="nav-badge" id="pendingBadge">0</span>
+      </div>
+      <div class="nav-item" id="nav-history" onclick="showSection('history')">
+        <span class="nav-icon">📅</span>
+        <span>Post History</span>
+      </div>
+
+      <div class="nav-label" style="margin-top:16px">Configuration</div>
+      <div class="nav-item" id="nav-settings" onclick="showSection('settings')">
+        <span class="nav-icon">⚙️</span>
+        <span>Settings</span>
+      </div>
+      <div class="nav-item" id="nav-setup" onclick="showSection('setup')">
+        <span class="nav-icon">🚀</span>
+        <span>Setup Guide</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="schedule-status">
+        <div class="status-dot" id="schedulerDot"></div>
+        <div>
+          <div style="font-weight:600;color:var(--text-secondary)">Scheduler</div>
+          <div id="schedulerTime" style="font-size:11px">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div>
+        <div class="topbar-title" id="topbarTitle">🕌 Approval Queue</div>
+        <div class="topbar-subtitle" id="topbarSubtitle">Review AI-generated Islamic posts before publishing</div>
+      </div>
+      <div class="topbar-actions">
+        <div id="fbStatusIndicator"></div>
+        <button class="btn btn-ghost btn-sm" onclick="refreshData()">🔄 Refresh</button>
+        <button class="btn btn-primary" id="generateBtn" onclick="generatePost()">
+          ✨ Generate Now
+        </button>
+      </div>
+    </header>
+
+    <!-- APPROVAL SECTION -->
+    <section class="page-section active" id="section-approval">
+      <div class="stats-grid">
+        <div class="stat-card gold">
+          <div class="stat-icon">📝</div>
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">TOTAL POSTS</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-value" id="stat-pending">0</div>
+          <div class="stat-label">PENDING REVIEW</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">📤</div>
+          <div class="stat-value" id="stat-published">0</div>
+          <div class="stat-label">PUBLISHED</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon">❌</div>
+          <div class="stat-value" id="stat-rejected">0</div>
+          <div class="stat-label">REJECTED</div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">
+          🕌 Pending Approval
+          <span class="section-count" id="pendingCount">Loading...</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="approveAll()">✅ Approve All</button>
+      </div>
+
+      <div class="posts-grid" id="pendingPostsGrid">
+        <div class="empty-state">
+          <div class="loader-spinner" style="margin:0 auto 16px"></div>
+          <div class="empty-desc">Loading posts...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORY SECTION -->
+    <section class="page-section" id="section-history">
+      <div class="section-header">
+        <div class="section-title">📅 All Posts History</div>
+      </div>
+      <div class="table-container">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Surah / Ayat</th>
+              <th>Preview</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SETTINGS SECTION -->
+    <section class="page-section" id="section-settings">
+      <div class="settings-grid">
+
+        <!-- Scheduler Settings -->
+        <div class="settings-card">
+          <div class="settings-card-title">⏰ Scheduler Settings</div>
+
+          <div class="form-group">
+            <label class="form-label">Daily Post Time (Pakistan Time)</label>
+            <input type="time" class="form-input" id="setting-schedule_time" value="09:00" />
+            <div class="form-hint">New post will be generated daily at this time (Asia/Karachi timezone)</div>
+          </div>
+
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Auto-Schedule Enabled</div>
+              <div class="toggle-desc">Generate posts automatically every day</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="setting-schedule_enabled" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Mock Mode (No Real Publish)</div>
+              <div class="toggle-desc">Test without actually posting to Facebook</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="setting-mock_mode" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- AI Settings -->
+        <div class="settings-card">
+          <div class="settings-card-title">🤖 AI Settings (Gemini)</div>
+
+          <div class="form-group">
+            <label class="form-label">Google Gemini API Key</label>
+            <input type="password" class="form-input" id="setting-gemini_api_key"
+              placeholder="AIza..." />
+            <div class="form-hint">
+              Get free key at <a href="https://aistudio.google.com" target="_blank"
+                style="color:var(--accent-teal)">aistudio.google.com</a>
+              (Free tier: 1,500 req/day)
+            </div>
+          </div>
+
+          <div style="padding:12px;background:rgba(212,175,55,0.07);border-radius:10px;border:1px solid rgba(212,175,55,0.2)">
+            <div style="font-size:12px;font-weight:600;color:var(--accent-gold);margin-bottom:6px">
+              🖼️ Image Generation
+            </div>
+            <div style="font-size:12px;color:var(--text-muted)">
+              Using <strong style="color:var(--text-secondary)">Pollinations.ai</strong> — 100% free, no API key required. 
+              Generates beautiful Islamic art images automatically.
+            </div>
+          </div>
+        </div>
+
+        <!-- Facebook Settings -->
+        <div class="settings-card" style="grid-column: 1 / -1">
+          <div class="settings-card-title">📘 Facebook Page Settings</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+              <label class="form-label">Facebook Page ID</label>
+              <input type="text" class="form-input" id="setting-fb_page_id"
+                placeholder="e.g. 123456789012345" />
+              <div class="form-hint">Found in your Facebook Page settings or URL</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Page Access Token (Long-Lived)</label>
+              <input type="password" class="form-input" id="setting-fb_access_token"
+                placeholder="EAA..." />
+              <div class="form-hint">See Setup Guide for instructions on getting this token</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:4px">
+            <button class="btn btn-ghost btn-sm" id="validateFbBtn" onclick="validateFacebook()">
+              🔍 Validate Facebook Connection
+            </button>
+            <div id="fbValidationResult" style="font-size:13px;padding:8px 0"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:24px;display:flex;gap:12px">
+        <button class="btn btn-primary" onclick="saveSettings()">💾 Save All Settings</button>
+        <button class="btn btn-ghost" onclick="loadSettings()">↩️ Discard Changes</button>
+      </div>
+    </section>
+
+    <!-- SETUP GUIDE SECTION -->
+    <section class="page-section" id="section-setup">
+      <div class="setup-wizard">
+        <div class="wizard-header">
+          <span class="wizard-emoji">🕌</span>
+          <h1 class="wizard-title">Setup Guide</h1>
+          <p class="wizard-desc">Follow these steps to connect your AI system to Facebook and start publishing Quranic content automatically.</p>
+        </div>
+
+        <div class="wizard-steps">
+          <div class="wizard-step">
+            <div class="step-num">1</div>
+            <div>
+              <div class="step-title">🤖 Get Google Gemini API Key (Free)</div>
+              <div class="step-desc">
+                Go to <a href="https://aistudio.google.com" target="_blank" class="step-link">aistudio.google.com</a>
+                → Sign in with Google → Click "Get API Key" → Create API Key.
+                Free tier gives you 1,500 requests/day — more than enough for daily Islamic posts.
+                Copy and paste the key in Settings → AI Settings.
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-step">
+            <div class="step-num">2</div>
+            <div>
+              <div class="step-title">📘 Create a Facebook App</div>
+              <div class="step-desc">
+                Go to <a href="https://developers.facebook.com" target="_blank" class="step-link">developers.facebook.com</a>
+                → "My Apps" → "Create App" → Select "Business" type → Fill in app name (e.g. "Islamic Posts Bot").
+                Your app will give you access to the Graph API for publishing posts.
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-step">
+            <div class="step-num">3</div>
+            <div>
+              <div class="step-title">🔑 Get Your Page Access Token</div>
+              <div class="step-desc">
+                In your Facebook App → "Tools" → "Graph API Explorer" → 
+                Select your app → Select your Facebook Page from the dropdown → 
+                Click "Generate Access Token" → Grant permissions: 
+                <strong>pages_manage_posts</strong>, <strong>pages_read_engagement</strong>, <strong>publish_to_groups</strong>.
+                Then use the Token Debugger to extend it to a long-lived token (60 days).
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-step">
+            <div class="step-num">4</div>
+            <div>
+              <div class="step-title">🆔 Find Your Facebook Page ID</div>
+              <div class="step-desc">
+                Go to your Facebook Page → Click "About" → Scroll down to find Page ID.
+                Alternatively, go to <strong>facebook.com/your-page-name</strong>, then append 
+                <strong>/?fields=id</strong> after your page URL while logged in. 
+                Or use the Graph API Explorer: <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px">me/accounts</code>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-step">
+            <div class="step-num">5</div>
+            <div>
+              <div class="step-title">⚙️ Configure & Test</div>
+              <div class="step-desc">
+                Go to Settings → paste your Gemini API Key, Facebook Page ID, and Access Token.
+                Disable "Mock Mode" to enable real publishing.
+                Click "Validate Facebook Connection" to verify everything works.
+                Then click "Generate Now" to create your first Islamic post and approve it!
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-step">
+            <div class="step-num">6</div>
+            <div>
+              <div class="step-title">🌙 Done! Enjoy Daily Quranic Posts</div>
+              <div class="step-desc">
+                Every day at your scheduled time, the system will automatically generate a new Quranic post
+                with Arabic ayat, Urdu tarjuma, tafseer, and a beautiful Islamic image.
+                You'll review it in the Approval Queue and publish with one click. بارک اللہ فیک!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center">
+          <button class="btn btn-primary" onclick="showSection('settings')">
+            ⚙️ Go to Settings to Configure
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
