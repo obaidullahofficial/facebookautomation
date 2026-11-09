@@ -7,6 +7,9 @@ const OUTPUT_DIR = path.join(__dirname, "..", "frontend", "generated");
 const FONT_PATH = path.join(__dirname, "..", "fonts", "JameelNooriNastaleeq.ttf");
 const QWBW_FONT_PATH = path.join(__dirname, "..", "fonts", "Naskh-Nastaleeq-IndoPak-QWBW.ttf");
 
+const AMIRI_BOLD_PATH = path.join(__dirname, "..", "fonts", "Amiri-Bold.ttf");
+const SCHEHERAZADE_PATH = path.join(__dirname, "..", "fonts", "ScheherazadeNew-Bold.ttf");
+
 // Register fonts
 if (fs.existsSync(FONT_PATH)) {
   GlobalFonts.registerFromPath(FONT_PATH, "Jameel Noori Nastaleeq");
@@ -14,6 +17,12 @@ if (fs.existsSync(FONT_PATH)) {
 if (fs.existsSync(QWBW_FONT_PATH)) {
   GlobalFonts.registerFromPath(QWBW_FONT_PATH, "Naskh-Nastaleeq-IndoPak-QWBW");
   GlobalFonts.registerFromPath(QWBW_FONT_PATH, "Indopak Nastaleeq");
+}
+if (fs.existsSync(AMIRI_BOLD_PATH)) {
+  GlobalFonts.registerFromPath(AMIRI_BOLD_PATH, "Amiri");
+}
+if (fs.existsSync(SCHEHERAZADE_PATH)) {
+  GlobalFonts.registerFromPath(SCHEHERAZADE_PATH, "Scheherazade New");
 }
 
 if (!fs.existsSync(OUTPUT_DIR)) {
@@ -93,9 +102,9 @@ async function createComposedImage(post) {
     ctx.font = "bold 16px 'Segoe UI', Arial, sans-serif";
     ctx.fillText("—  AYAT OF THE DAY  —", width / 2, 255);
 
-    // 5. Arabic Ayat text using standard Arabic font
+    // 5. Arabic Ayat text using Amiri Quran font
     ctx.fillStyle = "#4a0e17"; // Maroon matching the tulips
-    const arabicFont = "bold 48px 'Noto Naskh Arabic', 'Arabic Typesetting', Arial";
+    const arabicFont = "bold 52px 'Amiri', 'Scheherazade New', 'Arabic Typesetting', Arial";
     ctx.font = arabicFont;
     ctx.textAlign = "center";
 
